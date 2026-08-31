@@ -1,0 +1,45 @@
+<svg width="1200" height="760" viewBox="0 0 1200 760" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="760" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#071020"/><stop offset="1" stop-color="#111A31"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#5B6CFF"/><stop offset="1" stop-color="#16C5B7"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="20" stdDeviation="24" flood-color="#000" flood-opacity=".42"/></filter>
+  </defs>
+  <rect width="1200" height="760" fill="url(#bg)"/>
+  <circle cx="1080" cy="50" r="300" fill="#243C91" opacity=".18"/>
+  <circle cx="80" cy="720" r="260" fill="#0B9F8E" opacity=".12"/>
+  <rect x="120" y="75" width="960" height="610" rx="28" fill="#0A1020" stroke="#31415F" filter="url(#shadow)"/>
+  <path d="M148 75H1052C1067.46 75 1080 87.536 1080 103V135H120V103C120 87.536 132.536 75 148 75Z" fill="#0E1729"/>
+  <rect x="150" y="91" width="32" height="32" rx="10" fill="url(#accent)"/>
+  <text x="166" y="114" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="17" font-weight="700" fill="white">文</text>
+  <text x="196" y="113" font-family="Segoe UI, sans-serif" font-size="16" font-weight="600" fill="#F1F5FF">Codex Language Switcher</text>
+  <rect x="398" y="96" width="70" height="22" rx="8" fill="#1D2A41"/>
+  <text x="433" y="111" text-anchor="middle" font-family="Segoe UI" font-size="10" fill="#8FA4C4">Windows</text>
+  <text x="164" y="197" font-family="Microsoft YaHei, sans-serif" font-size="38" font-weight="700" fill="#F5F7FF">让 Codex 说中文</text>
+  <text x="164" y="230" font-family="Microsoft YaHei, sans-serif" font-size="15" fill="#8FA4C4">一键切换界面语言 · 自动备份 · 随时恢复</text>
+  <rect x="840" y="185" width="170" height="38" rx="14" fill="#102A2B" stroke="#1B5753"/>
+  <circle cx="858" cy="204" r="5" fill="#39D9B0"/>
+  <text x="873" y="209" font-family="Microsoft YaHei, sans-serif" font-size="12" fill="#80E8CD">当前：简体中文</text>
+  <rect x="164" y="263" width="846" height="65" rx="15" fill="#0D1627" stroke="#1E2D46"/>
+  <rect x="180" y="278" width="34" height="34" rx="10" fill="#192844"/>
+  <text x="197" y="301" text-anchor="middle" font-family="Segoe UI Symbol" font-size="16" fill="#8EA4FF">⚙</text>
+  <text x="228" y="288" font-family="Microsoft YaHei, sans-serif" font-size="11" fill="#8598B8">配置文件</text>
+  <text x="228" y="310" font-family="Consolas" font-size="12" fill="#DDE6F7">C:\Users\you\.codex\config.toml</text>
+  <text x="164" y="372" font-family="Microsoft YaHei, sans-serif" font-size="14" font-weight="600" fill="#C7D3E9">选择界面语言</text>
+  <g font-family="Microsoft YaHei, sans-serif">
+    <rect x="164" y="391" width="193" height="150" rx="16" fill="#182642" stroke="#5B78FF" stroke-width="2"/>
+    <text x="186" y="435" font-size="31" font-weight="700" fill="#F4F7FF">简</text><text x="186" y="480" font-size="15" font-weight="600" fill="#EAF1FF">简体中文</text><text x="186" y="509" font-family="Segoe UI" font-size="11" fill="#7388A8">zh-CN</text>
+    <rect x="373" y="391" width="193" height="150" rx="16" fill="#121B2D" stroke="#263754"/>
+    <text x="395" y="435" font-size="31" font-weight="700" fill="#F4F7FF">繁</text><text x="395" y="480" font-size="15" font-weight="600" fill="#EAF1FF">繁體中文</text><text x="395" y="509" font-family="Segoe UI" font-size="11" fill="#7388A8">zh-TW</text>
+    <rect x="582" y="391" width="193" height="150" rx="16" fill="#121B2D" stroke="#263754"/>
+    <text x="604" y="435" font-family="Segoe UI" font-size="29" font-weight="700" fill="#F4F7FF">EN</text><text x="604" y="480" font-family="Segoe UI" font-size="15" font-weight="600" fill="#EAF1FF">English</text><text x="604" y="509" font-family="Segoe UI" font-size="11" fill="#7388A8">en-US</text>
+    <rect x="791" y="391" width="219" height="150" rx="16" fill="#121B2D" stroke="#263754"/>
+    <text x="813" y="435" font-family="Segoe UI" font-size="28" font-weight="700" fill="#F4F7FF">A✦</text><text x="813" y="480" font-size="15" font-weight="600" fill="#EAF1FF">跟随系统</text><text x="813" y="509" font-family="Segoe UI" font-size="11" fill="#7388A8">Auto</text>
+  </g>
+  <text x="164" y="601" font-family="Microsoft YaHei, sans-serif" font-size="12" fill="#93A5C2">✓ 设置成功，原配置已备份</text>
+  <rect x="770" y="571" width="240" height="52" rx="12" fill="url(#accent)"/>
+  <text x="890" y="603" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="14" font-weight="600" fill="white">应用语言设置  →</text>
+</svg>
