@@ -1,0 +1,17 @@
+name: Test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  core:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test configuration logic
+        shell: powershell
+        run: .\tests\Test-Core.ps1
+      - name: Test WPF interface
+        shell: powershell
+        run: .\tests\Test-Ui.ps1
