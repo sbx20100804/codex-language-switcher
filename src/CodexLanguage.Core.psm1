@@ -29,7 +29,7 @@ function Get-CodexLocaleOverride {
     $inDesktopSection = $false
 
     foreach ($line in $lines) {
-        if ($line -match '^\s*\[([^]]+)\]\s*$') {
+        if ($line -match '^\s*\[([^]]+)\]\s*(?:#.*)?$') {
             $inDesktopSection = ($Matches[1] -eq 'desktop')
             continue
         }
@@ -49,14 +49,17 @@ function Set-CodexLocaleOverride {
         [string] $ConfigPath,
 
         [AllowNull()]
-        [ValidateSet('zh-CN', 'zh-TW', 'en-US', $null)]
-        [string] $Locale
+        [AllowEmptyString()]
+        [ValidateSet('zh-CN', 'zh-TW', 'en-US', '')]
+        [string] $Locale,
+
+        [ValidateRange(1, 100)]
+        [int] $BackupLimit = 20
     )
 
     $parent = Split-Path -Parent $ConfigPath
-    if (-not (Test-Path -LiteralPath $parent)) {
-        New-Item -ItemType Directory -Path $parent -Force | Out-Null
-    }
+    if ([string]::IsNullOrWhiteSpace($parent)) { $parent = (Get-Location).Path }
+    $normalizedLocale = if ([string]::IsNullOrEmpty($Locale)) { $null } else { $Locale }
 
     $originalText = if (Test-Path -LiteralPath $ConfigPath) {
         [System.IO.File]::ReadAllText($ConfigPath)
@@ -76,10 +79,10 @@ function Set-CodexLocaleOverride {
     $desktopStart = -1
     $desktopEnd = $lines.Count
     for ($i = 0; $i -lt $lines.Count; $i++) {
-        if ($lines[$i] -match '^\s*\[desktop\]\s*$') {
+        if ($lines[$i] -match '^\s*\[desktop\]\s*(?:#.*)?$') {
             $desktopStart = $i
             for ($j = $i + 1; $j -lt $lines.Count; $j++) {
-                if ($lines[$j] -match '^\s*\[[^]]+\]\s*$') {
+                if ($lines[$j] -match '^\s*\[[^]]+\]\s*(?:#.*)?$') {
                     $desktopEnd = $j
                     break
                 }
@@ -92,14 +95,24 @@ function Set-CodexLocaleOverride {
     foreach ($line in $lines) { $result.Add($line) }
 
     if ($desktopStart -lt 0) {
+        if ($null -eq $normalizedLocale) {
+            return [pscustomobject]@{
+                ConfigPath  = $ConfigPath
+                Locale      = $normalizedLocale
+                BackupPath  = $null
+                Changed     = $false
+                WouldChange = $false
+            }
+        }
+
         while ($result.Count -gt 0 -and [string]::IsNullOrWhiteSpace($result[$result.Count - 1])) {
             $result.RemoveAt($result.Count - 1)
         }
 
         if ($result.Count -gt 0) { $result.Add('') }
         $result.Add('[desktop]')
-        if ($null -ne $Locale) {
-            $result.Add(('localeOverride = "{0}"' -f $Locale))
+        if ($null -ne $normalizedLocale) {
+            $result.Add(('localeOverride = "{0}"' -f $normalizedLocale))
         }
     }
     else {
@@ -111,16 +124,21 @@ function Set-CodexLocaleOverride {
             }
         }
 
-        if ($null -eq $Locale) {
+        if ($null -eq $normalizedLocale) {
             if ($localeLine -ge 0) {
                 $result.RemoveAt($localeLine)
             }
         }
         elseif ($localeLine -ge 0) {
-            $result[$localeLine] = ('localeOverride = "{0}"' -f $Locale)
+            if ($result[$localeLine] -match '^(\s*localeOverride\s*=\s*)["''][^"'']+["''](\s*(?:#.*)?)$') {
+                $result[$localeLine] = ('{0}"{1}"{2}' -f $Matches[1], $normalizedLocale, $Matches[2])
+            }
+            else {
+                $result[$localeLine] = ('localeOverride = "{0}"' -f $normalizedLocale)
+            }
         }
         else {
-            $result.Insert($desktopStart + 1, ('localeOverride = "{0}"' -f $Locale))
+            $result.Insert($desktopStart + 1, ('localeOverride = "{0}"' -f $normalizedLocale))
         }
     }
 
@@ -129,26 +147,58 @@ function Set-CodexLocaleOverride {
         $updatedText += $newline
     }
 
-    $backupPath = $null
-    if (Test-Path -LiteralPath $ConfigPath) {
-        $backupDirectory = Join-Path $parent 'language-switcher-backups'
-        New-Item -ItemType Directory -Path $backupDirectory -Force | Out-Null
-        $stamp = Get-Date -Format 'yyyyMMdd-HHmmss-fff'
-        $backupPath = Join-Path $backupDirectory "config.$stamp.toml.bak"
-        Copy-Item -LiteralPath $ConfigPath -Destination $backupPath -Force
+    $contentChanged = $updatedText -cne $originalText
+    if (-not $contentChanged) {
+        return [pscustomobject]@{
+            ConfigPath  = $ConfigPath
+            Locale      = $normalizedLocale
+            BackupPath  = $null
+            Changed     = $false
+            WouldChange = $false
+        }
     }
 
+    $backupPath = $null
+    $changed = $false
+
     if ($PSCmdlet.ShouldProcess($ConfigPath, 'Update Codex desktop locale')) {
-        $tempPath = "$ConfigPath.language-switcher.tmp"
-        $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
-        [System.IO.File]::WriteAllText($tempPath, $updatedText, $utf8NoBom)
-        Move-Item -LiteralPath $tempPath -Destination $ConfigPath -Force
+        if (-not (Test-Path -LiteralPath $parent)) {
+            New-Item -ItemType Directory -Path $parent -Force | Out-Null
+        }
+
+        $backupDirectory = Join-Path $parent 'language-switcher-backups'
+        if (Test-Path -LiteralPath $ConfigPath) {
+            New-Item -ItemType Directory -Path $backupDirectory -Force | Out-Null
+            $stamp = Get-Date -Format 'yyyyMMdd-HHmmss-fff'
+            $backupPath = Join-Path $backupDirectory "config.$stamp.toml.bak"
+            Copy-Item -LiteralPath $ConfigPath -Destination $backupPath -Force
+        }
+
+        $tempPath = "$ConfigPath.language-switcher.$([guid]::NewGuid().ToString('N')).tmp"
+        try {
+            $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
+            [System.IO.File]::WriteAllText($tempPath, $updatedText, $utf8NoBom)
+            Move-Item -LiteralPath $tempPath -Destination $ConfigPath -Force
+            $changed = $true
+        }
+        finally {
+            Remove-Item -LiteralPath $tempPath -Force -ErrorAction SilentlyContinue
+        }
+
+        if (Test-Path -LiteralPath $backupDirectory) {
+            Get-ChildItem -LiteralPath $backupDirectory -Filter 'config.*.toml.bak' -File -ErrorAction SilentlyContinue |
+                Sort-Object LastWriteTimeUtc -Descending |
+                Select-Object -Skip $BackupLimit |
+                Remove-Item -Force -ErrorAction SilentlyContinue
+        }
     }
 
     [pscustomobject]@{
-        ConfigPath = $ConfigPath
-        Locale     = $Locale
-        BackupPath = $backupPath
+        ConfigPath  = $ConfigPath
+        Locale      = $normalizedLocale
+        BackupPath  = $backupPath
+        Changed     = $changed
+        WouldChange = $contentChanged
     }
 }
 
@@ -169,6 +219,11 @@ function Restore-LatestCodexConfigBackup {
     }
 
     if ($PSCmdlet.ShouldProcess($ConfigPath, "Restore $($latest.FullName)")) {
+        if (Test-Path -LiteralPath $ConfigPath) {
+            $stamp = Get-Date -Format 'yyyyMMdd-HHmmss-fff'
+            $undoBackup = Join-Path $backupDirectory "config.$stamp.toml.bak"
+            Copy-Item -LiteralPath $ConfigPath -Destination $undoBackup -Force
+        }
         Copy-Item -LiteralPath $latest.FullName -Destination $ConfigPath -Force
     }
 

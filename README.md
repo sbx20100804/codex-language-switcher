@@ -9,6 +9,8 @@
 - 一键切换 **简体中文 / 繁體中文 / English / 跟随系统**
 - 自动识别 `%USERPROFILE%\.codex\config.toml`
 - 每次修改前自动备份，支持一键恢复
+- 相同设置不会重复写入或制造无用备份
+- 自动保留最近 20 份备份，恢复操作也可以再次撤销
 - 原子写入配置，降低配置文件损坏风险
 - 深色现代 UI，不依赖 Electron、Python 或第三方组件
 - 兼容 Windows PowerShell 5.1 与 PowerShell 7
@@ -35,7 +37,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -STA -File .\Codex-Language-Sw
 localeOverride = "zh-CN"
 ```
 
-备份保存在：
+备份保存在（默认只保留最近 20 份）：
 
 ```text
 %USERPROFILE%\.codex\language-switcher-backups\

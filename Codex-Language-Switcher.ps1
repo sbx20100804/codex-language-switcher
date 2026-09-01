@@ -257,10 +257,10 @@ $OpenFolderButton.Add_Click({
 $ApplyButton.Add_Click({
     try {
         $ApplyButton.IsEnabled = $false
-        $StatusText.Text = '正在写入并创建备份…'
+        $StatusText.Text = '正在检查配置并安全写入…'
         $result = Set-CodexLocaleOverride -ConfigPath $ConfigPath -Locale $script:selectedLocale
         Refresh-Status
-        $StatusText.Text = if ($result.BackupPath) { '✓ 设置成功，原配置已备份' } else { '✓ 设置成功' }
+        $StatusText.Text = if (-not $result.Changed) { '✓ 无需修改，当前设置已经正确' } elseif ($result.BackupPath) { '✓ 设置成功，原配置已备份' } else { '✓ 设置成功' }
         $StatusText.Foreground = '#52D6B7'
     }
     catch {

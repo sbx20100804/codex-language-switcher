@@ -3,15 +3,24 @@ name: Test
 on:
   push:
   pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   core:
     runs-on: windows-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        shell: [powershell, pwsh]
     steps:
       - uses: actions/checkout@v4
       - name: Test configuration logic
-        shell: powershell
+        shell: ${{ matrix.shell }}
         run: .\tests\Test-Core.ps1
       - name: Test WPF interface
-        shell: powershell
+        shell: ${{ matrix.shell }}
         run: .\tests\Test-Ui.ps1
