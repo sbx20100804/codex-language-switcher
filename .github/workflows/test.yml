@@ -12,15 +12,17 @@ jobs:
   core:
     runs-on: windows-latest
     timeout-minutes: 5
-    strategy:
-      fail-fast: false
-      matrix:
-        shell: [powershell, pwsh]
     steps:
       - uses: actions/checkout@v4
-      - name: Test configuration logic
-        shell: ${{ matrix.shell }}
+      - name: Test configuration logic (Windows PowerShell 5.1)
+        shell: powershell
         run: .\tests\Test-Core.ps1
-      - name: Test WPF interface
-        shell: ${{ matrix.shell }}
+      - name: Test WPF interface (Windows PowerShell 5.1)
+        shell: powershell
+        run: .\tests\Test-Ui.ps1
+      - name: Test configuration logic (PowerShell 7)
+        shell: pwsh
+        run: .\tests\Test-Core.ps1
+      - name: Test WPF interface (PowerShell 7)
+        shell: pwsh
         run: .\tests\Test-Ui.ps1
